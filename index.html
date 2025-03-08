@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>3D Card Carousel</title>
+  <title>Ultra Premium Card Experience</title>
   <style>
     * {
       margin: 0;
@@ -11,56 +11,87 @@
       box-sizing: border-box;
     }
     
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #121212, #2d2d2d);
-      font-family: 'Arial', sans-serif;
-      color: white;
-      overflow: hidden;
+    :root {
+      --card-width: 340px;
+      --card-height: 460px;
+      --card-border-radius: 24px;
+      --primary-color: #6200ea;
+      --secondary-color: #00c6ff;
+      --background-color: #0a0a0a;
+      --text-color: #ffffff;
     }
     
-    .carousel-container {
-      position: relative;
-      width: 100vw;
-      height: 500px;
+    body {
+      min-height: 100vh;
+      background-color: var(--background-color);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(98, 0, 234, 0.3) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(0, 198, 255, 0.3) 0%, transparent 40%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text-color);
+      overflow: hidden;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
+    }
+    
+    .scene {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      perspective: 2000px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .carousel {
       position: relative;
-      width: 1000px;
-      height: 400px;
+      width: var(--card-width);
+      height: var(--card-height);
       transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
     }
     
     .card {
       position: absolute;
-      width: 320px;
-      height: 400px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      transform-style: preserve-3d;
-      transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      cursor: pointer;
+      width: var(--card-width);
+      height: var(--card-height);
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: var(--card-border-radius);
       overflow: hidden;
+      transform-style: preserve-3d;
+      transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+      box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+        0 0 30px rgba(98, 0, 234, 0.2) inset;
+      cursor: pointer;
+      backface-visibility: hidden;
     }
     
-    .card::before {
+    .card::after {
       content: '';
       position: absolute;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1));
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        135deg, 
+        rgba(255, 255, 255, 0.1) 0%, 
+        rgba(255, 255, 255, 0) 100%
+      );
+      border-radius: inherit;
       pointer-events: none;
+    }
+    
+    .card.active {
+      box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.5),
+        0 0 0 2px rgba(255, 255, 255, 0.2) inset,
+        0 0 50px rgba(98, 0, 234, 0.4) inset;
     }
     
     .card-content {
@@ -68,21 +99,25 @@
       bottom: 0;
       left: 0;
       width: 100%;
-      padding: 30px;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
-      transform: translateZ(20px);
+      height: 100%;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.9) 0%,
+        rgba(0, 0, 0, 0.7) 30%,
+        rgba(0, 0, 0, 0) 100%
+      );
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1);
     }
     
-    .card-title {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    }
-    
-    .card-description {
-      font-size: 16px;
-      opacity: 0.8;
+    .card.active .card-content {
+      opacity: 1;
+      transform: translateY(0);
     }
     
     .card-image {
@@ -92,123 +127,311 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      z-index: -1;
+      filter: brightness(0.9) contrast(1.1);
+      transition: all 1s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    
+    .card.active .card-image {
+      filter: brightness(1) contrast(1.05);
+      transform: scale(1.05);
+    }
+    
+    .card-number {
+      position: absolute;
+      top: 30px;
+      right: 30px;
+      font-size: 120px;
+      font-weight: 900;
+      opacity: 0.1;
+      color: white;
+      line-height: 0.8;
+    }
+    
+    .card-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.1s;
+    }
+    
+    .card.active .card-title {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .card-description {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.2s;
+    }
+    
+    .card.active .card-description {
+      transform: translateY(0);
+      opacity: 0.8;
+    }
+    
+    .card-button {
+      align-self: flex-start;
+      padding: 12px 24px;
+      background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+      border: none;
+      border-radius: 50px;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: all 0.6s cubic-bezier(0.23, 1, 0.32, 1) 0.3s;
+      box-shadow: 0 10px 20px rgba(98, 0, 234, 0.3);
+    }
+    
+    .card.active .card-button {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    
+    .card-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 25px rgba(98, 0, 234, 0.4);
     }
     
     .controls {
       position: absolute;
-      bottom: 20px;
+      bottom: 50px;
       display: flex;
-      gap: 20px;
-      z-index: 100;
+      gap: 30px;
+      align-items: center;
     }
     
     .control-btn {
-      background: rgba(255, 255, 255, 0.2);
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 30px;
-      cursor: pointer;
-      font-size: 16px;
-      backdrop-filter: blur(5px);
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.3s;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
     }
     
     .control-btn:hover {
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-3px);
     }
     
-    .progress-container {
+    .progress-bar-container {
       position: absolute;
-      bottom: 80px;
-      width: 200px;
+      bottom: 120px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .progress-item {
+      width: 60px;
       height: 4px;
       background: rgba(255, 255, 255, 0.2);
       border-radius: 2px;
       overflow: hidden;
+      cursor: pointer;
     }
     
-    .progress-bar {
+    .progress-fill {
       height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #3498db, #9b59b6);
+      width: 0;
+      background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
       transition: width 0.05s linear;
+    }
+    
+    .progress-item.active .progress-fill {
+      width: 100%;
+      transition: width 3s linear;
+    }
+    
+    .title-container {
+      position: absolute;
+      top: 60px;
+      text-align: center;
+    }
+    
+    .main-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-fill-color: transparent;
+    }
+    
+    .subtitle {
+      font-size: 16px;
+      opacity: 0.7;
+    }
+    
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+      animation: float 15s infinite ease-in-out;
+      opacity: 0.4;
+      filter: blur(8px);
+    }
+    
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) translateX(0);
+      }
+      25% {
+        transform: translateY(-30px) translateX(30px);
+      }
+      50% {
+        transform: translateY(-60px) translateX(-30px);
+      }
+      75% {
+        transform: translateY(-30px) translateX(-60px);
+      }
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+      }
+      50% {
+        transform: scale(1.1);
+        opacity: 0.7;
+      }
+    }
+    
+    .background-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
+      filter: blur(100px);
+      opacity: 0.2;
+      animation: pulse 10s infinite ease-in-out;
+      z-index: -2;
     }
   </style>
 </head>
 <body>
-  <div class="carousel-container">
-    <div class="carousel"></div>
-    <div class="controls">
-      <button class="control-btn" id="prev-btn">Previous</button>
-      <button class="control-btn" id="play-pause-btn">Pause</button>
-      <button class="control-btn" id="next-btn">Next</button>
-    </div>
-    <div class="progress-container">
-      <div class="progress-bar" id="progress-bar"></div>
-    </div>
+  <div class="background-glow"></div>
+  <div class="particles" id="particles"></div>
+  
+  <div class="title-container">
+    <div class="main-title">Madhu Kunchala</div>
+    <div class="subtitle">curosel styles</div>
   </div>
+  
+  <div class="scene">
+    <div class="carousel" id="carousel"></div>
+  </div>
+  
+  <div class="controls">
+    <div class="control-btn" id="prev-btn">←</div>
+    <div class="control-btn" id="play-pause-btn">❚❚</div>
+    <div class="control-btn" id="next-btn">→</div>
+  </div>
+  
+  <div class="progress-bar-container" id="progress-container"></div>
 
   <script>
     // Card data
     const cardsData = [
       {
         id: 1,
-        title: "Smart solutions",
-        description: "Explore majestic peaks and breathtaking landscapes.",
-        color: "#3498db"
+        title: "Cosmic Voyage",
+        description: "Embark on a journey through the stars and witness the birth of new galaxies in the farthest reaches of our universe.",
+        buttonText: "Explore"
       },
       {
         id: 2,
-        title: "Madhu Kunchala",
-        description: "Experience the calming waves and golden horizons.",
-        color: "#e74c3c"
+        title: "Oceanic Dreams",
+        description: "Dive into the depths of the ocean where bioluminescent creatures create a mesmerizing light show in the darkest waters.",
+        buttonText: "Discover"
       },
       {
         id: 3,
-        title: "Raaja bro",
-        description: "Discover the mysteries hidden within ancient trees.",
-        color: "#2ecc71"
+        title: "Desert Mirage",
+        description: "Experience the surreal beauty of endless sand dunes shifting under the scorching sun and starlit skies.",
+        buttonText: "Adventure"
       },
       {
         id: 4,
-        title: "Nandhini",
-        description: "Witness the beauty of endless dunes and clear skies.",
-        color: "#9b59b6"
+        title: "Ancient Forest",
+        description: "Walk among towering trees that have stood for centuries, guardians of wisdom and keepers of forgotten stories.",
+        buttonText: "Wander"
       },
       {
         id: 5,
-        title: "vishwa",
-        description: "Navigate through the vibrant city life and architecture.",
-        color: "#f1c40f"
+        title: "Arctic Wonder",
+        description: "Witness the dance of northern lights as they paint the sky with vibrant colors over pristine ice landscapes.",
+        buttonText: "Behold"
       }
     ];
 
     // DOM elements
-    const carousel = document.querySelector('.carousel');
+    const carousel = document.getElementById('carousel');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
     const playPauseBtn = document.getElementById('play-pause-btn');
-    const progressBar = document.getElementById('progress-bar');
+    const progressContainer = document.getElementById('progress-container');
+    const particlesContainer = document.getElementById('particles');
     
     // Variables
-    let currentIndex = 0;
+    let activeIndex = 0;
     let isPlaying = true;
-    let interval;
-    let progressInterval;
-    const rotationDuration = 3000; // 3 seconds
+    let autoplayInterval;
+    let zOffset = 0;
     
     // Create cards
     cardsData.forEach((data, index) => {
+      // Create card element
       const card = document.createElement('div');
-      card.className = 'card';
-      card.dataset.id = data.id;
+      card.className = `card ${index === 0 ? 'active' : ''}`;
       card.dataset.index = index;
-      card.style.backgroundColor = data.color;
       
-      // Card content
+      // Create card number
+      const cardNumber = document.createElement('div');
+      cardNumber.className = 'card-number';
+      cardNumber.textContent = (index + 1).toString().padStart(2, '0');
+      
+      // Create image
+      const image = document.createElement('img');
+      image.className = 'card-image';
+      image.src = `/api/placeholder/340/460`;
+      image.alt = data.title;
+      
+      // Create content
       const content = document.createElement('div');
       content.className = 'card-content';
       
@@ -220,131 +443,184 @@
       description.className = 'card-description';
       description.textContent = data.description;
       
+      const button = document.createElement('button');
+      button.className = 'card-button';
+      button.textContent = data.buttonText;
+      
+      // Append elements
       content.appendChild(title);
       content.appendChild(description);
-      
-      // Card image (using placeholders)
-      const image = document.createElement('img');
-      image.className = 'card-image';
-      image.src = `/api/placeholder/320/400`;
-      image.alt = data.title;
+      content.appendChild(button);
       
       card.appendChild(image);
+      card.appendChild(cardNumber);
       card.appendChild(content);
+      
+      // Add to carousel
       carousel.appendChild(card);
       
-      // Add click event
+      // Create progress item
+      const progressItem = document.createElement('div');
+      progressItem.className = `progress-item ${index === 0 ? 'active' : ''}`;
+      progressItem.dataset.index = index;
+      
+      const progressFill = document.createElement('div');
+      progressFill.className = 'progress-fill';
+      
+      progressItem.appendChild(progressFill);
+      progressContainer.appendChild(progressItem);
+      
+      // Add event listeners
       card.addEventListener('click', () => {
-        if (index !== currentIndex) {
+        if (index !== activeIndex) {
           navigateToCard(index);
         }
       });
+      
+      progressItem.addEventListener('click', () => {
+        navigateToCard(index);
+      });
     });
     
-    // Position cards in 3D space
+    // Create floating particles
+    for (let i = 0; i < 10; i++) {
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      
+      // Random size
+      const size = Math.random() * 80 + 40;
+      particle.style.width = `${size}px`;
+      particle.style.height = `${size}px`;
+      
+      // Random position
+      particle.style.top = `${Math.random() * 100}%`;
+      particle.style.left = `${Math.random() * 100}%`;
+      
+      // Random animation delay
+      particle.style.animationDelay = `${Math.random() * 10}s`;
+      
+      particlesContainer.appendChild(particle);
+    }
+    
+    // Position cards
     function positionCards() {
       const cards = document.querySelectorAll('.card');
       const totalCards = cards.length;
-      const angleIncrement = (2 * Math.PI) / totalCards;
-      const radius = 400; // Distance from center
       
       cards.forEach((card, index) => {
-        // Calculate position based on index relative to current index
-        const relativeIndex = (index - currentIndex + totalCards) % totalCards;
-        const angle = relativeIndex * angleIncrement;
+        // Calculate position
+        const relativeIndex = (index - activeIndex + totalCards) % totalCards;
+        let xPos, zPos, rotation, scale;
         
-        // Calculate 3D position
-        const x = radius * Math.sin(angle);
-        const z = radius * Math.cos(angle) - radius;
-        
-        // Front card is bigger and more visible
-        const scale = relativeIndex === 0 ? 1.2 : 0.8;
-        const opacity = relativeIndex === 0 ? 1 : 0.6;
+        if (relativeIndex === 0) {
+          // Active card (center)
+          xPos = 0;
+          zPos = 100;
+          rotation = 0;
+          scale = 1;
+          card.classList.add('active');
+        } else if (relativeIndex <= 2) {
+          // Cards to the right
+          xPos = 200 + (relativeIndex - 1) * 60;
+          zPos = -300 - (relativeIndex - 1) * 50;
+          rotation = -15 - (relativeIndex - 1) * 5;
+          scale = 0.9 - (relativeIndex - 1) * 0.1;
+          card.classList.remove('active');
+        } else {
+          // Cards to the left
+          const reverseIndex = totalCards - relativeIndex;
+          xPos = -200 - (reverseIndex - 1) * 60;
+          zPos = -300 - (reverseIndex - 1) * 50;
+          rotation = 15 + (reverseIndex - 1) * 5;
+          scale = 0.9 - (reverseIndex - 1) * 0.1;
+          card.classList.remove('active');
+        }
         
         // Apply transforms
-        card.style.transform = `translateX(${x}px) translateZ(${z}px) scale(${scale})`;
-        card.style.opacity = opacity;
-        card.style.zIndex = totalCards - relativeIndex;
+        card.style.transform = `translateX(${xPos}px) translateZ(${zPos}px) rotateY(${rotation}deg) scale(${scale})`;
+        card.style.zIndex = relativeIndex === 0 ? 10 : 5 - Math.abs(relativeIndex);
+      });
+      
+      // Update progress indicators
+      document.querySelectorAll('.progress-item').forEach((item, index) => {
+        if (index === activeIndex) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
       });
     }
     
     // Navigate to specific card
     function navigateToCard(index) {
-      currentIndex = index;
+      activeIndex = index;
       positionCards();
-      resetProgressBar();
+      resetAutoplay();
     }
     
-    // Navigate to next card
+    // Go to next card
     function nextCard() {
-      currentIndex = (currentIndex + 1) % cardsData.length;
+      activeIndex = (activeIndex + 1) % cardsData.length;
       positionCards();
-      resetProgressBar();
     }
     
-    // Navigate to previous card
+    // Go to previous card
     function prevCard() {
-      currentIndex = (currentIndex - 1 + cardsData.length) % cardsData.length;
+      activeIndex = (activeIndex - 1 + cardsData.length) % cardsData.length;
       positionCards();
-      resetProgressBar();
     }
     
     // Start autoplay
     function startAutoplay() {
-      clearInterval(interval);
-      interval = setInterval(nextCard, rotationDuration);
-      startProgressBar();
+      clearInterval(autoplayInterval);
+      autoplayInterval = setInterval(nextCard, 3000);
       isPlaying = true;
-      playPauseBtn.textContent = 'Pause';
+      playPauseBtn.innerHTML = '❚❚';
+      resetProgressFill();
     }
     
     // Stop autoplay
     function stopAutoplay() {
-      clearInterval(interval);
-      clearInterval(progressInterval);
+      clearInterval(autoplayInterval);
       isPlaying = false;
-      playPauseBtn.textContent = 'Play';
-      progressBar.style.width = '0%';
+      playPauseBtn.innerHTML = '▶';
+      document.querySelectorAll('.progress-fill').forEach(fill => {
+        fill.style.width = '0';
+      });
     }
     
-    // Handle the progress bar
-    function startProgressBar() {
-      clearInterval(progressInterval);
-      progressBar.style.width = '0%';
-      
-      const updateFrequency = 50; // Update every 50ms for smooth animation
-      const increment = (updateFrequency / rotationDuration) * 100;
-      let progress = 0;
-      
-      progressInterval = setInterval(() => {
-        progress += increment;
-        progressBar.style.width = `${Math.min(progress, 100)}%`;
-        
-        if (progress >= 100) {
-          progress = 0;
-        }
-      }, updateFrequency);
-    }
-    
-    // Reset progress bar
-    function resetProgressBar() {
+    // Reset autoplay
+    function resetAutoplay() {
       if (isPlaying) {
-        clearInterval(progressInterval);
-        startProgressBar();
-        clearInterval(interval);
-        interval = setInterval(nextCard, rotationDuration);
+        clearInterval(autoplayInterval);
+        autoplayInterval = setInterval(nextCard, 3000);
+        resetProgressFill();
       }
+    }
+    
+    // Reset progress fill
+    function resetProgressFill() {
+      document.querySelectorAll('.progress-fill').forEach(fill => {
+        fill.style.width = '0';
+      });
+      
+      setTimeout(() => {
+        const activeFill = document.querySelector(`.progress-item[data-index="${activeIndex}"] .progress-fill`);
+        if (activeFill) {
+          activeFill.style.width = '100%';
+        }
+      }, 50);
     }
     
     // Event listeners
     prevBtn.addEventListener('click', () => {
       prevCard();
-      if (isPlaying) resetProgressBar();
+      resetAutoplay();
     });
     
     nextBtn.addEventListener('click', () => {
       nextCard();
-      if (isPlaying) resetProgressBar();
+      resetAutoplay();
     });
     
     playPauseBtn.addEventListener('click', () => {
@@ -355,7 +631,18 @@
       }
     });
     
-    // Handle window resize
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') {
+        nextCard();
+        resetAutoplay();
+      } else if (e.key === 'ArrowLeft') {
+        prevCard();
+        resetAutoplay();
+      }
+    });
+    
+    // Window resize handler
     window.addEventListener('resize', positionCards);
     
     // Initialize
